@@ -1,0 +1,33 @@
+<pb-nav></pb-nav>
+
+<table class="table table-light">
+    <thead>
+      <tr>
+        <th scope="col">Local evento</th>
+        <th scope="col">Usuarios do evento</th>
+        <th scope="col">Limite convidados</th>
+        <th scope="col">Cadastrar usuário</th>
+        
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let e of eventos">
+        <td>{{e["local"]}}</td>
+        <td>
+            <pb-usuarios-evento [usuariosEvento]="usuarios_evento[e['id_evento']]"></pb-usuarios-evento>
+        </td>
+        <td>{{e["limite_convidados"]}}</td>
+        <td>
+            <pb-autocomplete 
+                  (metodoPai)="onSelected($event)"
+                  [id]="e['id_evento']"
+                  [textoPlaceholder]="textoPlaceholder[e['id_evento']]"
+                  [desabilitado]="desabilitado[e['id_evento']]" 
+                  [nRelacionados]="usuariosNRelacionados[e['id_evento']]" >
+            </pb-autocomplete>
+        </td>
+      </tr>
+     
+     
+    </tbody>
+</table>

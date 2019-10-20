@@ -1,0 +1,22 @@
+<form [formGroup]="myForm" class="example-form" (submit)="cadastrarUsuarioEvento()" >
+    <mat-form-field class="example-full-width">
+       
+        <input
+                type="text" [placeholder]="textoPlaceholder" 
+                aria-label="Number" matInput [formControl]="myControl" 
+                [matAutocomplete]="auto">
+
+        <mat-autocomplete #auto="matAutocomplete">
+        <mat-option *ngFor="let option of filteredOptions | async" [value]="option">
+            {{option}}
+        </mat-option>
+        </mat-autocomplete>
+        
+    </mat-form-field>
+    <div *ngIf="!desabilitado">
+        <button [disabled]="myControl.invalid" 
+                type="submit" class="ml-2 btn btn-primary">
+                Inserir
+        </button>
+    </div>
+</form>
