@@ -1,0 +1,58 @@
+<pb-nav></pb-nav>
+
+<div class="row mt-3">
+        <div class="col-6">
+                <div class="text-center">
+                    Listar usuários
+                </div>
+                <table class="table table-dark">
+                  <thead>
+                    <tr>
+                      <th scope="col">#</th>
+                      <th scope="col">nome</th>
+                      <th scope="col">telefone</th>
+                      
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let usuario of users">
+                      <th scope="row">{{usuario.id_usuario}}</th>
+                      <td>{{usuario.nome}}</td>
+                      <td>{{usuario.telefone}}</td>
+                    </tr>
+                   
+                   
+                  </tbody>
+                </table>
+            </div><!-- fim da div usuarios-->
+
+            <div class="col-6">
+                    <div class="text-center">
+                        Listar eventos
+                    </div>
+                    <table class="table table-dark">
+                      <thead>
+                        <tr>
+                          <th scope="col">aberto?</th>
+                          <th scope="col">local</th>
+                          <th scope="col">limite máximo</th>
+                          <th scope="col">data vencimento</th>
+                          
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr *ngFor="let evento of events">
+                          <td *ngIf="evento.vencido == 0">SIM</td>
+                          <td *ngIf="evento.vencido != 0">NÃO</td>
+                          <td>{{evento.local}}</td>
+                          <td>{{evento.limite_convidados}}</td>
+                          <td>{{evento.momento | date: 'hh:mm a, dd/MM/yyyy'}}</td>
+                        </tr>
+                       
+                       
+                      </tbody>
+                    </table>
+                </div> <!-- fim da div eventos-->
+
+</div>
+
