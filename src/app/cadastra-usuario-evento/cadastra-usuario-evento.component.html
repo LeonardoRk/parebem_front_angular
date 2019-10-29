@@ -12,18 +12,18 @@
     </thead>
     <tbody>
       <tr *ngFor="let e of eventos">
-        <td>{{e["local"]}}</td>
+        <td>{{e["place"]}}</td>
         <td>
-            <pb-usuarios-evento [usuariosEvento]="usuarios_evento[e['id_evento']]"></pb-usuarios-evento>
+            <pb-usuarios-evento [usuariosEvento]="usuarios_evento[e['eventId']]"></pb-usuarios-evento>
         </td>
-        <td>{{e["limite_convidados"]}}</td>
+        <td>{{e["guestLimit"]}}</td>
         <td>
             <pb-autocomplete 
                   (metodoPai)="onSelected($event)"
                   [id]="e['id_evento']"
-                  [textoPlaceholder]="textoPlaceholder[e['id_evento']]"
-                  [desabilitado]="desabilitado[e['id_evento']]" 
-                  [nRelacionados]="usuariosNRelacionados[e['id_evento']]" >
+                  [textoPlaceholder]="textoPlaceholder[e['eventId']]"
+                  [desabilitado]="desabilitado[e['eventId']]" 
+                  [nRelacionados]="usuariosNRelacionados[e['eventId']]" >
             </pb-autocomplete>
         </td>
       </tr>

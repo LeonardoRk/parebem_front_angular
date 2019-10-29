@@ -30,14 +30,14 @@ export class CriarEventoComponent  implements OnInit {
   }
 
   cadastrarEvento(){
-    const local = this.formularioEvento.get('local').value;;
-    const limite_convidados = this.formularioEvento.get('limite_convidados').value;;
-    const momento = this.formularioEvento.get('momento').value;
-    console.log(limite_convidados + "  " + local + "  " + momento);
-    this.apiService.createEvento(local, limite_convidados, momento)
+    const place = this.formularioEvento.get('local').value;;
+    const guestLimit  = this.formularioEvento.get('limite_convidados').value;;
+    const expirationMoment  = this.formularioEvento.get('momento').value;
+    console.log(guestLimit  + "  " + place + "  " + expirationMoment );
+    this.apiService.createEvent(place, guestLimit , expirationMoment )
       .subscribe(
         data => {
-          console.log("dados retornados do servidor")
+          console.log("returned data from server")
           console.log(data);
           this.router.navigate(["home"]);
         },

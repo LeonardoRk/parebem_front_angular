@@ -20,20 +20,20 @@ export class ApiService {
         return this.http.get(API + '/eventos');
     }
 
-    listarEventosAbertos(){
+    listOpenedEvents(){
         return this.http.get(API + '/eventos/abertos');
     }
 
-    validaLogin(nome:string, senha:string){
-        return this.http.post(API + '/login', {nome, senha}, this.options);
+    validaLogin(name:string, password:string){
+        return this.http.post(API + '/login', {name, password}, this.options);
     }
 
-    createUser(nome:string, senha:string, telefone:string){
-        return this.http.post(API + '/usuarios/criar', {nome,senha,telefone}, this.options);
+    createUser(name:string, password:string, telephone:string){
+        return this.http.post(API + '/usuarios/criar', {name,password,telephone}, this.options);
     }
 
-    createEvento(local:string, limite_convidados:string, momento:string){
-        return this.http.post(API + '/eventos/criar', {local, limite_convidados, momento}, this.options);
+    createEvent(place:string, guestLimit:string, expirationMoment:string){
+        return this.http.post(API + '/eventos/criar', {place, guestLimit, expirationMoment}, this.options);
     }
 
     infosPagCadastro(){

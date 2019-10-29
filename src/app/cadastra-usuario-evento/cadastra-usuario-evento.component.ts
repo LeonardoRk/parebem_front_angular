@@ -3,6 +3,7 @@ import { ApiService } from '../api.service';
 import { Router } from '@angular/router';
 import { ElementFinder } from 'protractor';
 import { TokenService } from '../token.service';
+import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-cadastra-usuario-evento',
@@ -13,9 +14,9 @@ export class CadastraUsuarioEventoComponent implements OnInit {
 
   private eventos = [];
   private usuarios = [];
-  private usuarios_evento = [];
+  private usuarios_evento = {};
   private usuariosNRelacionados = {};
-  private qtdEventosAbertos = -1;
+  private numberOfOpenedEvents = -1;
   private desabilitado= {};
   private textoPlaceholder = {};
 
@@ -28,14 +29,19 @@ export class CadastraUsuarioEventoComponent implements OnInit {
     }else{
       setInterval(()=> {
         console.log("verifica mudancas em eventos");
-        this.apiService.listarEventosAbertos()
+        this.apiService.listOpenedEvents()
           .subscribe(
             data =>{
+              console.log("incoming data");
+              console.log(data);
               let dataString = JSON.stringify(data);
-              let eventosAbertos = JSON.parse(dataString);
-              if(this.qtdEventosAbertos == -1){
-                this.qtdEventosAbertos = eventosAbertos.length;
-              }else if(this.qtdEventosAbertos != eventosAbertos.length){
+              let openedEvents = JSON.parse(dataString);
+              openedEvents = openedEvents["opened_events"]
+              console.log("openedEvents");
+              console.log(openedEvents);
+              if(this.numberOfOpenedEvents == -1){
+                this.numberOfOpenedEvents = openedEvents.length;
+              }else if(this.numberOfOpenedEvents != openedEvents.length){
                 console.log("setando novamente eventos");
                 this.atualizaDadosLocais();
               }
@@ -53,41 +59,60 @@ export class CadastraUsuarioEventoComponent implements OnInit {
   }
 
   atualizaDadosLocais(){
-    this.apiService.infosPagCadastro()
-      .subscribe(
-        data => {
-          console.log("conversão deu certo");
-          this.eventos = data["eventos"];
-          this.usuarios = data["usuarios"];
-          this.usuarios_evento = data["usuarios_evento"];
-          for(let i = 0 ; i < this.eventos.length; i++){
-            let dic = this.usuariosForaEvento(this.eventos[i]["id_evento"]);
-            this.usuariosNRelacionados[this.eventos[i]["id_evento"]] = dic;
-            if(this.eventos[i]["vencido"] == 0){
-              this.desabilitado[this.eventos[i]["id_evento"]] = false;
-              this.textoPlaceholder[this.eventos[i]["id_evento"]] = "Escolha um usuário";
-            }else{
-              this.desabilitado[this.eventos[i]["id_evento"]] = true;
-              this.textoPlaceholder[this.eventos[i]["id_evento"]] = "Evento fechado";
-            }
-            console.log("nomes nos eventos");
-            let arrayPresentes = this.usuarios_evento[this.eventos[i]["id_evento"]];
-            arrayPresentes = JSON.parse(arrayPresentes);
-            console.log(arrayPresentes);
-            console.log("qtd usuarios: " + arrayPresentes.length);
-            if(arrayPresentes.length >= this.eventos[i]["limite_convidados"]){
-              if(this.desabilitado[this.eventos[i]["id_evento"]] == false){
-                this.desabilitado[this.eventos[i]["id_evento"]] = true;
-                this.textoPlaceholder[this.eventos[i]["id_evento"]] = "Limite atingido";
-              }
-            }
-            console.log(this.eventos[i]["limite_convidados"]);
-          }
-        },
-        err => {
-          console.log(err);
+    forkJoin(
+      this.apiService.infosPagCadastro(),
+      this.apiService.listUsers(),
+    ).subscribe(([data, users]) => {
+      console.log("conversão deu certo");
+          
+      let dict = {}
+      dict = JSON.parse(JSON.stringify(data));
+     
+      for (var event in dict) {
+        // check if the property/key is defined in the object itself, not in parent
+        if (dict.hasOwnProperty(event)) {  
+            this.eventos.push(JSON.parse(event));
+
+            let e = JSON.parse(event);
+            this.usuarios_evento[e['eventId']] = dict[event];
         }
-    );
+      }
+
+      let usersString = JSON.stringify(users);
+      this.usuarios = JSON.parse(usersString)["all_users"];
+      console.log("all users");
+      console.log(this.usuarios);
+
+      for(var i in this.eventos){
+        console.log("events id");
+        console.log(this.eventos[i]["eventId"]);
+        let dic = this.usuariosForaEvento(this.eventos[i]["eventId"]);
+        console.log("users out of event ");
+        console.log(dic);
+        this.usuariosNRelacionados[this.eventos[i]["eventId"]] = dic;
+        if(this.eventos[i]["state"] === "ABERTO"){
+          this.desabilitado[this.eventos[i]["eventId"]] = false;
+          this.textoPlaceholder[this.eventos[i]["eventId"]] = "Escolha um usuário";
+        }else{
+          this.desabilitado[this.eventos[i]["eventId"]] = true;
+          this.textoPlaceholder[this.eventos[i]["eventId"]] = "Evento fechado";
+        }
+        console.log("nomes nos eventos");
+        let arrayPresentes = this.usuarios_evento[this.eventos[i]["eventId"]];
+        arrayPresentes = JSON.parse(arrayPresentes);
+        console.log(arrayPresentes);
+        console.log("qtd usuarios: " + arrayPresentes.length);
+        if(arrayPresentes.length >= this.eventos[i]["guestLimit"]){
+          if(this.desabilitado[this.eventos[i]["eventId"]] == false){
+            this.desabilitado[this.eventos[i]["eventId"]] = true;
+            this.textoPlaceholder[this.eventos[i]["eventId"]] = "Limite atingido";
+          }
+        }
+        console.log(this.eventos[i]["limite_convidados"]);
+      }
+
+    });
+    
   }
 
   onSelected(respostaFilho){
@@ -118,23 +143,26 @@ export class CadastraUsuarioEventoComponent implements OnInit {
   usuariosForaEvento(idEvento){
     let id_nome = {};
     let usuariosDoEvento = this.usuarios_evento[idEvento];
+    
     usuariosDoEvento = JSON.parse(usuariosDoEvento);
-
-
+   
     for(let m = 0 ; m < this.usuarios.length; m++){
       let encontrou = false;
-      let nomeMaior = this.usuarios[m]["nome"];
+      let nomeMaior = JSON.parse(this.usuarios[m])["name"];
+     
       for(let i = 0 ; i < usuariosDoEvento.length; i++){
-        let nome = usuariosDoEvento[i]["nome"];
+        let nome = usuariosDoEvento[i]["name"];
         if(nomeMaior == nome){
           encontrou = true;
         }
       }
+      console.log("encontrou:" + encontrou);
       if(!encontrou){
-        id_nome[this.usuarios[m]["id_usuario"]] = nomeMaior;
+        id_nome[JSON.parse(this.usuarios[m])["user_id"]] = nomeMaior;
       }
     }
-    
+    console.log("id_nome");
+    console.log(id_nome);
     return id_nome;
   }
  

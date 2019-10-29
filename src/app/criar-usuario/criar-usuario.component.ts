@@ -38,10 +38,11 @@ export class CriarUsuarioComponent implements OnInit {
 
   onSubmit(){
     console.log("formulário submetido");
-    const nome = this.cadastraUsuario.get('nome').value;
-    const senha = this.cadastraUsuario.get('senha').value;
-    const telefone = this.cadastraUsuario.get('telefone').value;
-    this.apiService.createUser(nome, senha, telefone)
+    const name = this.cadastraUsuario.get('nome').value;
+    const password = this.cadastraUsuario.get('senha').value;
+    const telephone = this.cadastraUsuario.get('telefone').value;
+    console.log(name + password+ telephone);
+    this.apiService.createUser(name, password, telephone)
       .subscribe(
         data => {
           console.log("retorno do servidor para cadastro de usuário");
